@@ -46,9 +46,15 @@ app.use((req, res, next) => {
 app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(keycloak.middleware());
-app.get('/reports', keycloak.protect('prothetic_user'), (request, response) => {
-  response.json(request.user);
-});
+app.get(
+  '/reports',
+  keycloak.protect((token) => {
+    return token.hasRealmRole('prothetic_user');
+  }),
+  (request, response) => {
+    response.json(request.kauth);
+  }
+);
 app.use((_, response, __) => {
   response.status(404).send("Sorry, that resource wasn't found.");
 });
